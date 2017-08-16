@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "WaterMatchResultViewController.h"
 
 @interface ViewController ()
 
@@ -16,9 +17,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    self.view.backgroundColor = [UIColor redColor];
 }
 
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    WaterMatchResultViewController *waterVc = [[WaterMatchResultViewController alloc] init];
+    [self.navigationController pushViewController:waterVc animated:YES];
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

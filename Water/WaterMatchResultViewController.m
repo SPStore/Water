@@ -43,21 +43,21 @@ static NSString * waterCell = @"waterCell";
         for (NSDictionary *dic in dataArray) {
             WaterMatchResultModel *model = [[WaterMatchResultModel alloc] init];
             [model setValuesForKeysWithDictionary:dic];
-            
+            [self.doctorList addObject:model];
+
             // 提前计算image大小
             CGSize imageSize = [[SPImageManager shareImageManager] sizeWithUrlString:model.dnLifePhoto];
             model.imageWidth = imageSize.width;
             model.imageHeight = imageSize.height;
-            [self.doctorList addObject:model];
+            // 通知主线程刷新
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (self.doctorList.count == dataArray.count) {
+                    [self.collectionView reloadData];
+                    [SPLoadingHUD hideHUDWithAnimated:YES];
+                }
+            });
         }
-        // 通知主线程刷新
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (self.doctorList.count == dataArray.count) {
-                [self.collectionView reloadData];
-                [SPLoadingHUD hideHUDWithAnimated:YES];
-            }
-        }); 
-        
+  
     });
  
     [self setupLayout];

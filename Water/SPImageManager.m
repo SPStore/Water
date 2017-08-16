@@ -30,7 +30,12 @@
         // imageFromMemoryCacheForKey:这个方法只会从内存中取
         UIImage* image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:url.absoluteString];
         if(!image) {
+            
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
             NSData* data = [[SDImageCache sharedImageCache] performSelector:@selector(diskImageDataBySearchingAllPathsForKey:) withObject:url.absoluteString];
+#pragma clang diagnostic pop
+            
             image = [UIImage imageWithData:data];
         }
         if (image) {
@@ -56,7 +61,7 @@
     if(CGSizeEqualToSize(CGSizeZero, size)) {
         
         // 如果获取文件头信息失败,发送同步请求请求原图
-        NSData* data = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:url] returningResponse:nil error:nil];
+        NSData* data = [self sendSynchronousRequest:[NSURLRequest requestWithURL:url] returningResponse:nil error:nil];
         
         UIImage* image = [UIImage imageWithData:data];
         
@@ -78,7 +83,7 @@
     
     [request setValue:@"bytes=16-23" forHTTPHeaderField:@"Range"];
     
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    NSData* data = [self sendSynchronousRequest:request returningResponse:nil error:nil];
     
     if(data.length == 8) {
         
@@ -119,7 +124,7 @@
     
     [request setValue:@"bytes=6-9" forHTTPHeaderField:@"Range"];
     
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    NSData* data = [self sendSynchronousRequest:request returningResponse:nil error:nil];
     
     if(data.length == 4) {
         
@@ -148,15 +153,11 @@
 }
 
 
--(CGSize)getJPGImageSizeWithRequest:(NSMutableURLRequest*)request
-
-{
+-(CGSize)getJPGImageSizeWithRequest:(NSMutableURLRequest*)request {
     
     [request setValue:@"bytes=0-209" forHTTPHeaderField:@"Range"];
     
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
-    
-    
+    NSData* data = [self sendSynchronousRequest:request returningResponse:nil error:nil];
     
     if ([data length] <= 0x58) {
         
@@ -243,5 +244,31 @@
         
     }
 }
+
+- (NSData *)sendSynchronousRequest:(NSURLRequest *)request returningResponse:(NSURLResponse * _Nullable * _Nullable)response error:(NSError **)error  {
+    
+    __block NSData *myData;
+    
+    //创建信号量
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    
+    NSURLSession *session = [NSURLSession sharedSession];
+    
+    NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        
+        myData = data;
+        
+        //发送
+        dispatch_semaphore_signal(semaphore);
+    }];
+    [task resume];
+        
+    // 等待(阻塞线程)
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+    
+    return myData;
+    
+}
+
 
 @end

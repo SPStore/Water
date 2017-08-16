@@ -13,6 +13,7 @@
 #import "Datasource.h"
 #import "UIImageView+WebCache.h"
 #import "SPImageManager.h"
+#import "SPLoadingHUD.h"
 
 static NSString * waterCell = @"waterCell";
 
@@ -35,26 +36,32 @@ static NSString * waterCell = @"waterCell";
     
     NSArray *dataArray = dic[@"dnData"][@"doctorList"];
     
-    for (NSDictionary *dic in dataArray) {
-        WaterMatchResultModel *model = [[WaterMatchResultModel alloc] init];
-        [model setValuesForKeysWithDictionary:dic];
-
-        // 提前计算image大小
-        CGSize imageSize = [[SPImageManager shareImageManager] sizeWithUrlString:model.dnLifePhoto];
-        model.imageWidth = imageSize.width;
-        model.imageHeight = imageSize.height;
-        [self.doctorList addObject:model];
-        
-        if (self.doctorList.count == dataArray.count) {
-            [self.collectionView reloadData];
+    [SPLoadingHUD showHUDWithTitle:@"正在加载..." animated:YES];
+    
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        // 处理耗时操作的代码块...
+        for (NSDictionary *dic in dataArray) {
+            WaterMatchResultModel *model = [[WaterMatchResultModel alloc] init];
+            [model setValuesForKeysWithDictionary:dic];
+            
+            // 提前计算image大小
+            CGSize imageSize = [[SPImageManager shareImageManager] sizeWithUrlString:model.dnLifePhoto];
+            model.imageWidth = imageSize.width;
+            model.imageHeight = imageSize.height;
+            [self.doctorList addObject:model];
         }
-    }
+        // 通知主线程刷新
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self.doctorList.count == dataArray.count) {
+                [self.collectionView reloadData];
+                [SPLoadingHUD hideHUDWithAnimated:YES];
+            }
+        }); 
+        
+    });
  
     [self setupLayout];
 }
-
-
-
 
 - (void)setupLayout {
     // 创建布局

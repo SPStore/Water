@@ -15,7 +15,7 @@
 // 医生的头像
 @property (nonatomic, strong) UIImageView *doctorHeaderIconView;
 // 头像底部的一个带阴影效果背景图
-@property (nonatomic, strong) UIImageView *bottomShadowImageView;
+@property (nonatomic, strong) WaterColorLine *colorLine;
 // 医生的名字
 @property (nonatomic, strong) UILabel *doctorNameLabel;
 // 喜欢的小图标，”心形“
@@ -42,7 +42,7 @@
         
         self.backgroundColor = [UIColor whiteColor];
         [self.contentView addSubview:self.doctorHeaderIconView];
-        [self.contentView addSubview:self.bottomShadowImageView];
+        [self.contentView addSubview:self.colorLine];
         [self.contentView addSubview:self.doctorNameLabel];
         [self.contentView addSubview:self.likeIconView];
         [self.contentView addSubview:self.likeCountLabel];
@@ -88,13 +88,13 @@
     
     [self.doctorNameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.mas_equalTo(self.doctorHeaderIconView).offset(kLRMargin);
-        make.bottom.mas_equalTo(self.doctorHeaderIconView);
+        make.bottom.mas_equalTo(self.doctorHeaderIconView).offset(-kVpadding);
         make.width.mas_equalTo(self.mas_width).multipliedBy(0.5);
         make.height.mas_equalTo(kCommonHeight);
     }];
     
     [self.likeCountLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.bottom.mas_equalTo(self.doctorHeaderIconView);
+        make.bottom.mas_equalTo(self.doctorNameLabel);
         make.right.mas_equalTo(self.doctorHeaderIconView).offset(-kLRMargin);
         make.height.mas_equalTo(kCommonHeight);
     }];
@@ -103,6 +103,11 @@
         make.right.mas_equalTo(self.likeCountLabel.mas_left).offset(-kLRMargin);
         make.centerY.mas_equalTo(self.likeCountLabel);
         make.width.height.mas_equalTo(15);
+    }];
+    
+    [self.colorLine mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.mas_equalTo(self.doctorHeaderIconView);
+        make.height.mas_equalTo(3);
     }];
     
     [self.descLabel mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -151,13 +156,13 @@
     return _doctorHeaderIconView;
 }
 
-- (UIImageView *)bottomShadowImageView {
+- (WaterColorLine *)colorLine {
     
-    if (!_bottomShadowImageView) {
-        _bottomShadowImageView = [[UIImageView alloc] init];
+    if (!_colorLine) {
+        _colorLine = [[WaterColorLine alloc] init];
         
     }
-    return _doctorHeaderIconView;
+    return _colorLine;
 }
 
 - (UILabel *)doctorNameLabel {
@@ -248,5 +253,46 @@
     return _timeLabel;
 }
 
+- (void)drawRect:(CGRect)rect {
+    
+}
 
 @end
+
+
+@implementation WaterColorLine
+
+- (void)drawRect:(CGRect)rect {
+    
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    
+    // 线条高度
+    CGContextSetLineWidth(ctx, rect.size.height);
+    
+    // 左边的线条
+    CGContextMoveToPoint(ctx, 0, rect.size.height*0.5);
+    CGContextAddLineToPoint(ctx, rect.size.width/3, rect.size.height*0.5);
+    // 随机色
+    [[UIColor colorWithRed:(arc4random_uniform(256))/255.0 green:(arc4random_uniform(256))/255.0 blue:(arc4random_uniform(256))/255.0 alpha:(1)] set];
+    CGContextStrokePath(ctx);
+    
+    // 中间的线条
+    CGContextMoveToPoint(ctx, rect.size.width/3, rect.size.height*0.5);
+    CGContextAddLineToPoint(ctx, rect.size.width*2/3, rect.size.height*0.5);
+    // 随机色
+    [[UIColor colorWithRed:(arc4random_uniform(256))/255.0 green:(arc4random_uniform(256))/255.0 blue:(arc4random_uniform(256))/255.0 alpha:(1)] set];
+    CGContextStrokePath(ctx);
+    
+    // 右边的线条
+    CGContextMoveToPoint(ctx, rect.size.width*2/3, rect.size.height*0.5);
+    CGContextAddLineToPoint(ctx, rect.size.width, rect.size.height*0.5);
+    // 随机色
+    [[UIColor colorWithRed:(arc4random_uniform(256))/255.0 green:(arc4random_uniform(256))/255.0 blue:(arc4random_uniform(256))/255.0 alpha:(1)] set];
+    CGContextStrokePath(ctx);
+    
+}
+
+
+@end
+
+

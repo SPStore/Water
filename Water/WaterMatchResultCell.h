@@ -14,3 +14,8 @@
 @property (nonatomic, strong) WaterMatchResultModel *model;
 
 @end
+
+
+@interface WaterColorLine : UIView
+
+@end

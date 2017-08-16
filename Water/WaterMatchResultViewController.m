@@ -45,7 +45,7 @@ static NSString * waterCell = @"waterCell";
             [model setValuesForKeysWithDictionary:dic];
             [self.doctorList addObject:model];
 
-            // 提前计算image大小
+            // 提前计算image大小，该方法会阻塞线程
             CGSize imageSize = [[SPImageManager shareImageManager] sizeWithUrlString:model.dnLifePhoto];
             model.imageWidth = imageSize.width;
             model.imageHeight = imageSize.height;
@@ -55,9 +55,10 @@ static NSString * waterCell = @"waterCell";
                     [self.collectionView reloadData];
                     [SPLoadingHUD hideHUDWithAnimated:YES];
                 }
-            });
+            }); 
         }
-  
+        
+        
     });
  
     [self setupLayout];

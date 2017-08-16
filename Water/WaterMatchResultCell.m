@@ -253,10 +253,6 @@
     return _timeLabel;
 }
 
-- (void)drawRect:(CGRect)rect {
-    
-}
-
 @end
 
 

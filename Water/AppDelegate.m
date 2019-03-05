@@ -4,7 +4,7 @@
 //
 //  Created by Libo on 17/8/15.
 //  Copyright © 2017年 iDress. All rights reserved.
-//
+//  app入口
 
 #import "AppDelegate.h"
 
